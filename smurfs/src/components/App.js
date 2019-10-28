@@ -1,16 +1,55 @@
-import React, { Component } from "react";
+import React, { useEffect } from "react";
+import { connect } from "react-redux";
+import { fetchSmurf } from '../actions/SmurfsAction';
+
+import InputForm from './InputForm';
+import Smurf from './Smurf';
+
 import "./App.css";
-class App extends Component {
-  render() {
+
+function App (props){
+  
+  useEffect(() => {
+    // kick off our asyncronous action creator
+    props.fetchSmurf();
+  }, []);
+
     return (
-      <div className="App">
-        <h1>SMURFS! 2.0 W/ Redux</h1>
-        <div>Welcome to your state management version of Smurfs!</div>
-        <div>Start inside of your `src/index.js` file!</div>
-        <div>Have fun!</div>
-      </div>
-    );
-  }
+      <>
+        <InputForm />
+
+        
+        {props.loadError && <p>Error: {props.loadError}</p>}
+
+        {/* want to make sure we take all possible states into account */}
+        {props.isSmurfLoading ? (
+          <div className="spinner" >Loading...</div>
+        ) : (
+          props.smurfs.map((smurf, index) => (
+            <Smurf key={index} smurf={smurf} />
+          ))
+
+        )}
+      </>
+
+  );
 }
 
-export default App;
+function mapStateToProps(state) {
+  return {
+    smurfs : state.smurfs,
+    isSmurfLoading: state.isLoading,
+    loadError: state.error
+  };
+}
+
+const mapDispatchToProps = {
+  // send a version of our action creator that's attached to
+  // the dispatcher to the component as a prop
+  fetchSmurf
+};
+
+export default connect(
+  mapStateToProps,
+  mapDispatchToProps
+)(App);
